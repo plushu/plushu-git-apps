@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $PLUSHU_TRACE ]] && set -x
+
+# Check that dependencies are installed
+
+if [[ ! -d "$PLUSHU_ROOT/plugins/git-hooking" ]]; then
+  cat >&2 <<EOF
+This plugin requires the plushu-git-hooking plugin.
+You can install it with:
+
+\$ plushu install git-hooking
+EOF
+fi
