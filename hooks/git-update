@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $PLUSHU_TRACE ]] && set -x
+
+# We expect GIT_DIR to be defined in the environment, which is why none of
+# these commands specify the Git repository to operate on.
+
+git_archive_all () {
+  # If this commit doesn't use submodules
+  if [ -z `git ls-tree $1 .gitmodules` ]; then
+    # traditional git-archive will suffice
+    git archive $1
+
+  # If this commit uses submodules
+  else
+    # Save the original Git repo
+    GIT_SRC=$GIT_DIR
+
+    # Create a temporary working tree to clone into
+    TMP_WORK_DIR=$(mktemp -d)
+    chmod 755 $TMP_WORK_DIR
+
+    # Unset the variables pointing to the original Git repo
+    unset GIT_DIR GIT_WORK_TREE
+
+    # Create a lightweight clone of the source
+    git clone --depth 1 -b $1 $GIT_SRC $TMP_WORK_DIR > /dev/null
+    GIT_DIR=$TMP_WORK_DIR
+
+    # Suppress detached head warnings
+    git config advice.detachedHead false
+
+    # Update submodules
+    git submodule update --init --recursive > /dev/null
+
+    # Remove git data
+    find -name .git -prune -exec rm -rf {} \; > /dev/null
+
+    # Tar up the temp directory
+    tar c $TMP_WORK_DIR
+
+    # Remove the temp directory
+    rm -rf $TMP_WORK_DIR > /dev/null
+  fi
+}
+
+if [[ $1 == "refs/heads/master" ]]; then
+  git_archive_all $3 | $PLUSHU_ROOT/lib/runhook build "$PLUSHU_REPO_NAME"
+  $PLUSHU_ROOT/lib/runhook release "$PLUSHU_REPO_NAME"
+  $PLUSHU_ROOT/lib/runhook deploy "$PLUSHU_REPO_NAME"
+fi
