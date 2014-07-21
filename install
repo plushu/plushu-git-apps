@@ -8,6 +8,6 @@ if [[ ! -d "$PLUSHU_ROOT/plugins/git-hooking" ]]; then
 This plugin requires the plushu-git-hooking plugin.
 You can install it with:
 
-\$ plushu install git-hooking
+\$ plushu plugins:install git-hooking
 EOF
 fi
