@@ -11,3 +11,6 @@ You can install it with:
 \$ plushu plugins:install git-hooking
 EOF
 fi
+
+# Make the root directory for app files
+mkdir -p "$PLUSHU_ROOT/apps"

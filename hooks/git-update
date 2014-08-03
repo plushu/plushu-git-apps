@@ -43,7 +43,9 @@ git_archive_all () {
   fi
 }
 
+# If the master branch is being updated
 if [[ $1 == "refs/heads/master" ]]; then
+  # Build, release, and deploy the new code before accepting the update
   git_archive_all $3 | $PLUSHU_ROOT/lib/runhook build "$PLUSHU_REPO_NAME"
   $PLUSHU_ROOT/lib/runhook release "$PLUSHU_REPO_NAME"
   $PLUSHU_ROOT/lib/runhook deploy "$PLUSHU_REPO_NAME"
