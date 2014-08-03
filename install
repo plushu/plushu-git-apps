@@ -14,3 +14,6 @@ fi
 
 # Make the root directory for app files
 mkdir -p "$PLUSHU_ROOT/apps"
+if [[ $EUID == 0 ]]; then
+  chown -R plushu "$PLUSHU_ROOT/apps"
+fi
