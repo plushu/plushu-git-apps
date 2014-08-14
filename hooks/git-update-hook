@@ -4,6 +4,8 @@ set -eo pipefail; [[ $PLUSHU_TRACE ]] && set -x
 # We expect GIT_DIR to be defined in the environment, which is why none of
 # these commands specify the Git repository to operate on.
 
+app=$PLUSHU_REPO_NAME
+
 # If the master branch is being updated
 if [[ "$1" == "refs/heads/master" ]]; then
 
@@ -12,8 +14,7 @@ if [[ "$1" == "refs/heads/master" ]]; then
   # If this commit doesn't use submodules
   if [ -z `git ls-tree "$1" .gitmodules` ]; then
     # Building an untarred git-archive will suffice
-    git archive "$1" |
-      "$PLUSHU_ROOT/lib/plushook" -i build-app-tar "$PLUSHU_REPO_NAME"
+    git archive "$1" | "$PLUSHU_ROOT/lib/plushook" -i build-app-tar "$app"
   # If this commit uses submodules
   else
     # Save the original Git repo
@@ -40,12 +41,11 @@ if [[ "$1" == "refs/heads/master" ]]; then
     find -name .git -prune -exec rm -rf {} \; > /dev/null
 
     # Build with the temp directory
-    "$PLUSHU_ROOT/lib/plushook" build-app-dir \
-      "$PLUSHU_REPO_NAME" "$TMP_WORK_DIR"
+    "$PLUSHU_ROOT/lib/plushook" build-app-dir "$app" "$TMP_WORK_DIR"
 
     # Remove the temp directory
     rm -rf "$TMP_WORK_DIR" > /dev/null
   fi
-  "$PLUSHU_ROOT/lib/plushook" release-app "$PLUSHU_REPO_NAME"
-  "$PLUSHU_ROOT/lib/plushook" deploy-app "$PLUSHU_REPO_NAME"
+  "$PLUSHU_ROOT/lib/plushook" release-app "$app"
+  "$PLUSHU_ROOT/lib/plushook" deploy-app "$app"
 fi
