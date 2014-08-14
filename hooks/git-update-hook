@@ -4,12 +4,16 @@ set -eo pipefail; [[ $PLUSHU_TRACE ]] && set -x
 # We expect GIT_DIR to be defined in the environment, which is why none of
 # these commands specify the Git repository to operate on.
 
-git_archive_all () {
-  # If this commit doesn't use submodules
-  if [ -z `git ls-tree $1 .gitmodules` ]; then
-    # traditional git-archive will suffice
-    git archive $1
+# If the master branch is being updated
+if [[ "$1" == "refs/heads/master" ]]; then
 
+  # Build, release, and deploy the new code before accepting the update
+
+  # If this commit doesn't use submodules
+  if [ -z `git ls-tree "$1" .gitmodules` ]; then
+    # Building an untarred git-archive will suffice
+    git archive "$1" |
+      "$PLUSHU_ROOT/lib/plushook" -i build-app-tar "$PLUSHU_REPO_NAME"
   # If this commit uses submodules
   else
     # Save the original Git repo
@@ -17,14 +21,14 @@ git_archive_all () {
 
     # Create a temporary working tree to clone into
     TMP_WORK_DIR=$(mktemp -d)
-    chmod 755 $TMP_WORK_DIR
+    chmod 755 "$TMP_WORK_DIR"
 
     # Unset the variables pointing to the original Git repo
     unset GIT_DIR GIT_WORK_TREE
 
     # Create a lightweight clone of the source
-    git clone --depth 1 -b $1 $GIT_SRC $TMP_WORK_DIR > /dev/null
-    GIT_DIR=$TMP_WORK_DIR
+    git clone --depth 1 -b "$1" "$GIT_SRC" "$TMP_WORK_DIR" > /dev/null
+    GIT_DIR="$TMP_WORK_DIR"
 
     # Suppress detached head warnings
     git config advice.detachedHead false
@@ -35,19 +39,13 @@ git_archive_all () {
     # Remove git data
     find -name .git -prune -exec rm -rf {} \; > /dev/null
 
-    # Tar up the temp directory
-    tar c $TMP_WORK_DIR
+    # Build with the temp directory
+    "$PLUSHU_ROOT/lib/plushook" build-app-dir \
+      "$PLUSHU_REPO_NAME" "$TMP_WORK_DIR"
 
     # Remove the temp directory
-    rm -rf $TMP_WORK_DIR > /dev/null
+    rm -rf "$TMP_WORK_DIR" > /dev/null
   fi
-}
-
-# If the master branch is being updated
-if [[ $1 == "refs/heads/master" ]]; then
-  # Build, release, and deploy the new code before accepting the update
-  git_archive_all $3 |
-    "$PLUSHU_ROOT/lib/plushook" -i build-app "$PLUSHU_REPO_NAME"
   "$PLUSHU_ROOT/lib/plushook" release-app "$PLUSHU_REPO_NAME"
   "$PLUSHU_ROOT/lib/plushook" deploy-app "$PLUSHU_REPO_NAME"
 fi
