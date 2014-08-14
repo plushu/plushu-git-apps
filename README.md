@@ -1,4 +1,3 @@
-plushu-git-receive-app
-======================
+# plushu-git-apps
 
-Plushu plugin that runs the app lifecycle when receiving code via Git
+Plushu plugin that handles the app lifecycle integration with Git
