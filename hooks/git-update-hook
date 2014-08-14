@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $PLUSHU_TRACE ]] && set -x
+set -eo pipefail; [[ -n "$PLUSHU_TRACE" ]] && set -x
 
 # We expect GIT_DIR to be defined in the environment, which is why none of
 # these commands specify the Git repository to operate on.
