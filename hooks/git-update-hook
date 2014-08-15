@@ -12,7 +12,7 @@ if [[ "$1" == "refs/heads/master" ]]; then
   # Build, release, and deploy the new code before accepting the update
 
   # If this commit doesn't use submodules
-  if [ -z `git ls-tree "$3" .gitmodules` ]; then
+  if [[ -z "$(git ls-tree "$3" .gitmodules)" ]]; then
     # Building an untarred git-archive will suffice
     git archive "$3" | "$PLUSHU_ROOT/lib/plushook" -i build-app-tar "$app"
   # If this commit uses submodules
@@ -27,18 +27,26 @@ if [[ "$1" == "refs/heads/master" ]]; then
     # Unset the variables pointing to the original Git repo
     unset GIT_DIR GIT_WORK_TREE
 
-    # Create a lightweight clone of the source
-    git clone --depth 1 -b "$3" "$GIT_SRC" "$TMP_WORK_DIR" > /dev/null
-    GIT_DIR="$TMP_WORK_DIR"
+    # Create a linked clone of the source
+    git clone "$GIT_SRC" "$TMP_WORK_DIR" > /dev/null
+
+    # Enter the clone
+    pushd "$TMP_WORK_DIR" > /dev/null
 
     # Suppress detached head warnings
     git config advice.detachedHead false
+
+    # check out the commit currently being pushed, as a detached head
+    git checkout "$3" > /dev/null
 
     # Update submodules
     git submodule update --init --recursive > /dev/null
 
     # Remove git data
     find -name .git -prune -exec rm -rf {} \; > /dev/null
+
+    # Exit the clone
+    popd > /dev/null
 
     # Build with the temp directory
     "$PLUSHU_ROOT/lib/plushook" build-app-dir "$app" "$TMP_WORK_DIR"
