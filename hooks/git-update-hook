@@ -24,35 +24,36 @@ if [[ "$1" == "refs/heads/master" ]]; then
     TMP_WORK_DIR=$(mktemp -d)
     chmod 755 "$TMP_WORK_DIR"
 
-    # Unset the variables pointing to the original Git repo
-    unset GIT_DIR GIT_WORK_TREE
+    # Within a silenced subshell
+    (
+      # Unset the variables pointing to the original Git repo
+      unset GIT_DIR GIT_WORK_TREE
 
-    # Create a linked clone of the source
-    git clone "$GIT_SRC" "$TMP_WORK_DIR" > /dev/null
+      # Create a linked clone of the source
+      git clone "$GIT_SRC" "$TMP_WORK_DIR"
 
-    # Enter the clone
-    pushd "$TMP_WORK_DIR" > /dev/null
+      # Enter the clone
+      cd "$TMP_WORK_DIR"
 
-    # Suppress detached head warnings
-    git config advice.detachedHead false
+      # Suppress detached head warnings (since we're still listening for
+      # stderr output)
+      git config advice.detachedHead false
 
-    # check out the commit currently being pushed, as a detached head
-    git checkout "$3" > /dev/null
+      # check out the commit currently being pushed, as a detached head
+      git checkout "$3"
 
-    # Update submodules
-    git submodule update --init --recursive > /dev/null
+      # Update submodules
+      git submodule update --init --recursive
 
-    # Remove git data
-    find -name .git -prune -exec rm -rf {} \; > /dev/null
-
-    # Exit the clone
-    popd > /dev/null
+      # Remove git data
+      find -name .git -prune -exec rm -rf {} \;
+    ) > /dev/null
 
     # Build with the temp directory
     "$PLUSHU_ROOT/lib/plushook" build-app-dir "$app" "$TMP_WORK_DIR"
 
     # Remove the temp directory
-    rm -rf "$TMP_WORK_DIR" > /dev/null
+    rm -rf "$TMP_WORK_DIR"
   fi
   "$PLUSHU_ROOT/lib/plushook" release-app "$app"
   "$PLUSHU_ROOT/lib/plushook" deploy-app "$app"
