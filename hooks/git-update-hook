@@ -12,9 +12,9 @@ if [[ "$1" == "refs/heads/master" ]]; then
   # Build, release, and deploy the new code before accepting the update
 
   # If this commit doesn't use submodules
-  if [ -z `git ls-tree "$1" .gitmodules` ]; then
+  if [ -z `git ls-tree "$3" .gitmodules` ]; then
     # Building an untarred git-archive will suffice
-    git archive "$1" | "$PLUSHU_ROOT/lib/plushook" -i build-app-tar "$app"
+    git archive "$3" | "$PLUSHU_ROOT/lib/plushook" -i build-app-tar "$app"
   # If this commit uses submodules
   else
     # Save the original Git repo
@@ -28,7 +28,7 @@ if [[ "$1" == "refs/heads/master" ]]; then
     unset GIT_DIR GIT_WORK_TREE
 
     # Create a lightweight clone of the source
-    git clone --depth 1 -b "$1" "$GIT_SRC" "$TMP_WORK_DIR" > /dev/null
+    git clone --depth 1 -b "$3" "$GIT_SRC" "$TMP_WORK_DIR" > /dev/null
     GIT_DIR="$TMP_WORK_DIR"
 
     # Suppress detached head warnings
