@@ -9,6 +9,14 @@ app=$PLUSHU_REPO_NAME
 # If the master branch is being updated
 if [[ "$1" == "refs/heads/master" ]]; then
 
+  if [[ -f "$PLUSHU_ROOT/apps/$app/receive.rc" ]]; then
+    source "$PLUSHU_ROOT/apps/$app/receive.rc"
+
+    # Echo all commands if PLUSHU_TRACE was set in receive.rc,
+    # and stop echoing them if it was unset
+    [[ -n "$PLUSHU_TRACE" ]] && set -x || set +x
+  fi
+
   # Build, release, and deploy the new code before accepting the update
 
   # If this commit doesn't use submodules
