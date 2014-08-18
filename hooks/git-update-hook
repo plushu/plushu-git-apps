@@ -20,10 +20,14 @@ if [[ "$1" == "refs/heads/master" ]]; then
   # Build, release, and deploy the new code before accepting the update
 
   # If this commit doesn't use submodules
-  if [[ -z "$(git ls-tree "$3" .gitmodules)" ]]; then
+  if [[ -z "$(git ls-tree "$3" .gitmodules)" &&
+    # and we're not set to keep .git directories
+    -z "$BUILD_KEEP_GIT_DIR" ]]; then
+
     # Building an untarred git-archive will suffice
     git archive "$3" | "$PLUSHU_ROOT/lib/plushook" -i build-app-tar "$app"
-  # If this commit uses submodules
+
+  # If this commit uses submodules, or we're set to keep .git
   else
     # Save the original Git repo
     GIT_SRC=$GIT_DIR
@@ -53,8 +57,11 @@ if [[ "$1" == "refs/heads/master" ]]; then
       # Update submodules
       git submodule update --init --recursive
 
-      # Remove git data
-      find -name .git -prune -exec rm -rf {} \;
+      # Unless we're supposed to keep .git directories
+      if [[ -z "$BUILD_KEEP_GIT_DIR" ]]; then
+        # strip them out
+        find -name .git -prune -exec rm -rf {} \;
+      fi
     ) > /dev/null
 
     # Build with the temp directory
