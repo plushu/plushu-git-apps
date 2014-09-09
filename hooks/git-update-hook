@@ -9,8 +9,8 @@ app=$PLUSHU_REPO_NAME
 # If the master branch is being updated
 if [[ "$1" == "refs/heads/master" ]]; then
 
-  if [[ -f "$PLUSHU_ROOT/apps/$app/receive.rc" ]]; then
-    source "$PLUSHU_ROOT/apps/$app/receive.rc"
+  if [[ -f "$PLUSHU_APPS_DIR/$app/receive.rc" ]]; then
+    source "$PLUSHU_APPS_DIR/$app/receive.rc"
 
     # Echo all commands if PLUSHU_TRACE was set in receive.rc,
     # and stop echoing them if it was unset

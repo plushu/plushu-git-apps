@@ -12,4 +12,4 @@ within your source tree to run.
 If you want to build your app with the .git directory *included* in your source
 tree (say, because your app does introspection on its git status at runtime),
 you can set the `BUILD_KEEP_GIT_DIR` environment variable in .plushurc, or in
-`$PLUSHU_ROOT/apps/$app/receive.rc`.
+`$PLUSHU_APPS_DIR/$app/receive.rc`.
