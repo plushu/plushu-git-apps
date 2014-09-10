@@ -31,11 +31,11 @@ if [[ -d "$PLUSHU_APPS_DIR/$app" && "$1" == "refs/heads/master" ]]; then
   # If this commit uses submodules, or we're set to keep .git
   else
     # Save the original Git repo
-    GIT_SRC=$GIT_DIR
+    git_src=$GIT_DIR
 
     # Create a temporary working tree to clone into
-    TMP_WORK_DIR=$(mktemp -d)
-    chmod 755 "$TMP_WORK_DIR"
+    tmp_dir=$(mktemp -d)
+    chmod 755 "$tmp_dir"
 
     # Within a silenced subshell
     (
@@ -43,10 +43,10 @@ if [[ -d "$PLUSHU_APPS_DIR/$app" && "$1" == "refs/heads/master" ]]; then
       unset GIT_DIR GIT_WORK_TREE
 
       # Create a linked clone of the source
-      git clone -n "$GIT_SRC" "$TMP_WORK_DIR"
+      git clone -n "$git_src" "$tmp_dir"
 
       # Enter the clone
-      cd "$TMP_WORK_DIR"
+      cd "$tmp_dir"
 
       # Suppress detached head warnings (since we're still listening for
       # stderr output)
@@ -66,10 +66,10 @@ if [[ -d "$PLUSHU_APPS_DIR/$app" && "$1" == "refs/heads/master" ]]; then
     ) > /dev/null
 
     # Build with the temp directory
-    "$PLUSHU_ROOT/lib/plushook" build-app-dir "$app" "$TMP_WORK_DIR"
+    "$PLUSHU_ROOT/lib/plushook" build-app-dir "$app" "$tmp_dir"
 
     # Remove the temp directory
-    rm -rf "$TMP_WORK_DIR"
+    rm -rf "$tmp_dir"
   fi
   "$PLUSHU_ROOT/lib/plushook" release-app "$app"
   "$PLUSHU_ROOT/lib/plushook" deploy-app "$app"
