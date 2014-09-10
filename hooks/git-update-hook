@@ -42,7 +42,7 @@ if [[ "$1" == "refs/heads/master" ]]; then
       unset GIT_DIR GIT_WORK_TREE
 
       # Create a linked clone of the source
-      git clone "$GIT_SRC" "$TMP_WORK_DIR"
+      git clone -n "$GIT_SRC" "$TMP_WORK_DIR"
 
       # Enter the clone
       cd "$TMP_WORK_DIR"
