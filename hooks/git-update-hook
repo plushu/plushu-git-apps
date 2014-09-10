@@ -6,9 +6,10 @@ set -eo pipefail; [[ -n "$PLUSHU_TRACE" ]] && set -x
 
 app=$PLUSHU_REPO_NAME
 
-# If the master branch is being updated
-if [[ "$1" == "refs/heads/master" ]]; then
+# If there's an app for this repo, and the master branch is being updated
+if [[ -d "$PLUSHU_APPS_DIR/$app" && "$1" == "refs/heads/master" ]]; then
 
+  # Source any special configuration for this app
   if [[ -f "$PLUSHU_APPS_DIR/$app/receive.rc" ]]; then
     source "$PLUSHU_APPS_DIR/$app/receive.rc"
 
