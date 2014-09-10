@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-set -eo pipefail; [[ -n "$PLUSHU_TRACE" ]] && set -x
-
-# Make the root directory for app files
-mkdir -p "$PLUSHU_APPS_DIR"
-if [[ "$EUID" == 0 ]]; then
-  chown -R "$PLUSHU_USER" "$PLUSHU_APPS_DIR"
-fi
