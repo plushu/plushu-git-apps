@@ -2,6 +2,12 @@
 
 Plushu plugin that handles the app lifecycle integration with Git
 
+This plugin is triggered by the `git-update-hook` Plushu hook, which is called
+by the Git `update` hook installed into repositories created by the
+[plushu-git][] plugin.
+
+[plushu-git]: https://github.com/plushu/plushu-git
+
 ## Keeping the .git directory
 
 By default, this plugin builds apps with the `.git` directory (or directories,

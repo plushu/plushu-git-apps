@@ -1,17 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ -n "$PLUSHU_TRACE" ]] && set -x
 
-# Check that dependencies are installed
-
-if [[ ! -d "$PLUSHU_ROOT/plugins/git" ]]; then
-  cat >&2 <<EOF
-This plugin requires the plushu-git plugin.
-You can install it with:
-
-\$ plushu plugins:install git
-EOF
-fi
-
 # Make the root directory for app files
 mkdir -p "$PLUSHU_APPS_DIR"
 if [[ "$EUID" == 0 ]]; then
