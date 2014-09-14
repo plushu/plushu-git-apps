@@ -1,76 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ -n "$PLUSHU_TRACE" ]] && set -x
 
-# We expect GIT_DIR to be defined in the environment, which is why none of
-# these commands specify the Git repository to operate on.
-
 app=$PLUSHU_REPO_NAME
 
 # If there's an app for this repo, and the master branch is being updated
 if [[ -d "$PLUSHU_APPS_DIR/$app" && "$1" == "refs/heads/master" ]]; then
-
-  # Source any special configuration for this app
-  if [[ -f "$PLUSHU_APPS_DIR/$app/receive.rc" ]]; then
-    source "$PLUSHU_APPS_DIR/$app/receive.rc"
-
-    # Echo all commands if PLUSHU_TRACE was set in receive.rc,
-    # and stop echoing them if it was unset
-    [[ -n "$PLUSHU_TRACE" ]] && set -x || set +x
-  fi
-
-  # Build, release, and deploy the new code before accepting the update
-
-  # If this commit doesn't use submodules
-  if [[ -z "$(git ls-tree "$3" .gitmodules)" &&
-    # and we're not set to keep .git directories
-    -z "$BUILD_KEEP_GIT_DIR" ]]; then
-
-    # Building an untarred git-archive will suffice
-    git archive "$3" | "$PLUSHU_ROOT/lib/plushook" -i build-app-tar "$app"
-
-  # If this commit uses submodules, or we're set to keep .git
-  else
-    # Save the original Git repo
-    git_src=$GIT_DIR
-
-    # Create a temporary working tree to clone into
-    tmp_dir=$(mktemp -d)
-    chmod 755 "$tmp_dir"
-
-    # Within a silenced subshell
-    (
-      # Unset the variables pointing to the original Git repo
-      unset GIT_DIR GIT_WORK_TREE
-
-      # Create a linked clone of the source
-      git clone -n "$git_src" "$tmp_dir"
-
-      # Enter the clone
-      cd "$tmp_dir"
-
-      # Suppress detached head warnings (since we're still listening for
-      # stderr output)
-      git config advice.detachedHead false
-
-      # check out the commit currently being pushed, as a detached head
-      git checkout "$3"
-
-      # Update submodules
-      git submodule update --init --recursive
-
-      # Unless we're supposed to keep .git directories
-      if [[ -z "$BUILD_KEEP_GIT_DIR" ]]; then
-        # strip them out
-        find -name .git -prune -exec rm -rf {} \;
-      fi
-    ) > /dev/null
-
-    # Build with the temp directory
-    "$PLUSHU_ROOT/lib/plushook" build-app-dir "$app" "$tmp_dir"
-
-    # Remove the temp directory
-    rm -rf "$tmp_dir"
-  fi
-  "$PLUSHU_ROOT/lib/plushook" release-app "$app"
-  "$PLUSHU_ROOT/lib/plushook" deploy-app "$app"
+  # Build it (GIT_DIR is already defined as part of this hook's environment)
+  "$PLUSHU_PLUGIN_PATH/lib/build-master" "$app" "$3"
 fi
