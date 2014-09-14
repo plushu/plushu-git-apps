@@ -6,5 +6,5 @@ app=$PLUSHU_REPO_NAME
 # If there's an app for this repo, and the master branch is being updated
 if [[ -d "$PLUSHU_APPS_DIR/$app" && "$1" == "refs/heads/master" ]]; then
   # Build it (GIT_DIR is already defined as part of this hook's environment)
-  "$PLUSHU_PLUGIN_PATH/lib/build-master" "$app" "$3"
+  "$PLUSHU_PLUGIN_PATH/lib/build-treeish" "$app" "$3"
 fi

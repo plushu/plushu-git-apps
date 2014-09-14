@@ -9,5 +9,5 @@ master=`git show-ref -s --verify refs/heads/master 2>/dev/null`
 # and there's an existing repo for this app with a master branch
 if [[ ! -e "$PLUSHU_APPS_DIR/$app/build.iid" && -n "$master" ]]; then
   # Build it
-  "$PLUSHU_PLUGIN_PATH/lib/build-master" "$app" "$master"
+  "$PLUSHU_PLUGIN_PATH/lib/build-treeish" "$app" "$master"
 fi
