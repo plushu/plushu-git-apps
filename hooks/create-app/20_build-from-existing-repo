@@ -3,7 +3,7 @@ set -eo pipefail; [[ -n "$PLUSHU_TRACE" ]] && set -x
 
 app=$1
 export GIT_DIR=$PLUSHU_REPOS_DIR/$app.git
-master=`git show-ref -s --verify refs/heads/master 2>/dev/null`
+master=`git show-ref -s --verify refs/heads/master 2>/dev/null ||:`
 
 # If this app doesn't have an existing build,
 # and there's an existing repo for this app with a master branch
